@@ -10,3 +10,4 @@ tsconfig.tsbuildinfo
 !jest.config.js
 !setup.js
 service_account_key.json
+.env

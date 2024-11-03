@@ -1,0 +1,10 @@
+---
+- name: Transfer k8s directory to control-plane
+  hosts: control-plane
+  tasks:
+    - name: Transfer k8s directory to control-plane
+      copy:
+        src: ../k8s
+        dest: /home/ubuntu
+        mode: '0755'
+      become: true

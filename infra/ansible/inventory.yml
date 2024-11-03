@@ -1,0 +1,13 @@
+control-plane:
+  hosts:
+    k8s-control-plane:
+      ansible_host: "{{ lookup('env', 'K8S_CONTROL_PLANE_PUBLIC_IP') }}"
+      ansible_user: ubuntu
+      ansible_ssh_private_key_file: ~/.ssh/my_k8s_key
+
+worker:
+  hosts:
+    k8s-worker-1:
+      ansible_host: "{{ lookup('env', 'K8S_WORKER_1_PUBLIC_IP') }}"
+      ansible_user: ubuntu
+      ansible_ssh_private_key_file: ~/.ssh/my_k8s_key
