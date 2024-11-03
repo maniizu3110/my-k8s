@@ -36,7 +36,7 @@ class GcpK8sClusterStack extends TerraformStack {
       allow: [
         {
           protocol: "tcp",
-          ports: ["22", "6443", "10250"], // SSH, API Server, Kubelet
+          ports: ["22", "6443", "10250", "30000"], // SSH, API Server, Kubelet, NodePort
         },
       ],
     });
@@ -61,7 +61,6 @@ class GcpK8sClusterStack extends TerraformStack {
         sshKeys: `ubuntu:${sshPublicKey}`,
       },
     });
-
     // Worker Node 1
     const worker1 = new google.computeInstance.ComputeInstance(this, "k8s-worker-1", {
       name: "k8s-worker-1",
