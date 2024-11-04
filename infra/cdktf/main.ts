@@ -28,58 +28,87 @@ class GcpK8sClusterStack extends TerraformStack {
       autoCreateSubnetworks: true,
     });
 
-    // ファイアウォールの設定 (SSHとkubeadm用ポートの許可)
-    new google.computeFirewall.ComputeFirewall(this, "firewall", {
-      name: "k8s-firewall",
+    // 外部からのアクセスを制限するファイアウォールルール
+    new google.computeFirewall.ComputeFirewall(this, "external-access", {
+      name: "k8s-external-access",
       network: network.name,
       sourceRanges: ["0.0.0.0/0"], // Allow from any IP address
       allow: [
         {
           protocol: "tcp",
-          ports: ["22", "6443", "10250", "30000"], // SSH, API Server, Kubelet, NodePort
+          ports: ["22", "80", "443"], // Allow only SSH, HTTP, and HTTPS from external
         },
       ],
+      direction: "INGRESS",
+      priority: 1000,
+    });
+
+    // 内部通信を許可するファイアウォールルール
+    new google.computeFirewall.ComputeFirewall(this, "internal-communication", {
+      name: "k8s-internal-communication",
+      network: network.name,
+      sourceRanges: ["10.0.0.0/8"], // Allow internal communication within the VPC
+      allow: [
+        {
+          protocol: "tcp",
+          ports: ["0-65535"], // Allow all TCP ports
+        },
+        {
+          protocol: "udp",
+          ports: ["0-65535"], // Allow all UDP ports
+        },
+      ],
+      direction: "INGRESS",
+      priority: 1001,
     });
 
     // Compute Engineインスタンスを3台、低スペックで作成
     // Control Plane Node
-    const controlPlane = new google.computeInstance.ComputeInstance(this, "k8s-control-plane", {
-      name: "k8s-control-plane",
-      machineType: "e2-small", // CPU 2vCPU, RAM 2GB
-      bootDisk: {
-        initializeParams: {
-          image: "ubuntu-os-cloud/ubuntu-2204-lts",
+    const controlPlane = new google.computeInstance.ComputeInstance(
+      this,
+      "k8s-control-plane",
+      {
+        name: "k8s-control-plane",
+        machineType: "e2-small", // CPU 2vCPU, RAM 2GB
+        bootDisk: {
+          initializeParams: {
+            image: "ubuntu-os-cloud/ubuntu-2204-lts",
+          },
         },
-      },
-      networkInterface: [
-        {
-          network: network.id,
-          accessConfig: [{}], // Empty access config block assigns an ephemeral public IP
+        networkInterface: [
+          {
+            network: network.id,
+            accessConfig: [{}], // Empty access config block assigns an ephemeral public IP
+          },
+        ],
+        metadata: {
+          sshKeys: `ubuntu:${sshPublicKey}`,
         },
-      ],
-      metadata: {
-        sshKeys: `ubuntu:${sshPublicKey}`,
-      },
-    });
+      }
+    );
     // Worker Node 1
-    const worker1 = new google.computeInstance.ComputeInstance(this, "k8s-worker-1", {
-      name: "k8s-worker-1",
-      machineType: "e2-small", // CPU 2vCPU, RAM 2GB
-      bootDisk: {
-        initializeParams: {
-          image: "ubuntu-os-cloud/ubuntu-2204-lts",
+    const worker1 = new google.computeInstance.ComputeInstance(
+      this,
+      "k8s-worker-1",
+      {
+        name: "k8s-worker-1",
+        machineType: "e2-small", // CPU 2vCPU, RAM 2GB
+        bootDisk: {
+          initializeParams: {
+            image: "ubuntu-os-cloud/ubuntu-2204-lts",
+          },
         },
-      },
-      networkInterface: [
-        {
-          network: network.id,
-          accessConfig: [{}], // Empty access config block assigns an ephemeral public IP
+        networkInterface: [
+          {
+            network: network.id,
+            accessConfig: [{}], // Empty access config block assigns an ephemeral public IP
+          },
+        ],
+        metadata: {
+          sshKeys: `ubuntu:${sshPublicKey}`,
         },
-      ],
-      metadata: {
-        sshKeys: `ubuntu:${sshPublicKey}`,
-      },
-    });
+      }
+    );
     new TerraformOutput(this, "K8S_CONTROL_PLANE_PUBLIC_IP", {
       value: controlPlane.networkInterface.get(0).accessConfig.get(0).natIp,
     });
@@ -105,6 +134,19 @@ class GcpK8sClusterStack extends TerraformStack {
     //     },
     //   ],
     // });
+
+    // MetalLB用のIPアドレスの取得.１つ
+    const ipAddress = new google.computeAddress.ComputeAddress(
+      this,
+      "metallb-ip-address",
+      {
+        name: "metallb-ip-address",
+        region: "us-central1",
+      }
+    );
+    new TerraformOutput(this, "METALLB_IP_ADDRESS", {
+      value: ipAddress.address,
+    });
   }
 }
 

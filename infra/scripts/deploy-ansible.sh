@@ -2,7 +2,7 @@
     
 set -eux
 
-cd infra
+cd cdktf
 
 # get output and set environment variables
 cdktf output --outputs-file tmp_output.json
@@ -17,4 +17,5 @@ ssh-keygen -R $K8S_WORKER_1_PUBLIC_IP
 # ansible deploy
 cd ../ansible
 ansible-playbook k8s-setup.yml -i inventory.yml
+ansible-playbook k9s-setup.yml -i inventory.yml
 ansible-playbook transfer-k8s-manifest.yml -i inventory.yml
