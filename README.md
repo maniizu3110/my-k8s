@@ -1,7 +1,11 @@
 # my-k8s
 
 
-## TODO
-- オンプレミスマシンをk8sクラスタに追加
-- RBACの設定
-- KaaSをサービスと提供することは可能なのか？(内部的にAWSを使うとする、サポート契約ありなどを踏まえて。)
+## やりたいこと
+### オンプレミス
+- Proxmox でKaaSを作る[参考](https://github.com/kubebn/talos-proxmox-kaas)
+
+### クラウド
+- Knativeのサポート
+- ArgoCDのサポート
+- CRDのサポート([KubernetesのCustomResourceDefinitionを理解する](https://qiita.com/shmurata/items/5f5334f67610b899a811))してKaaSとして利用
