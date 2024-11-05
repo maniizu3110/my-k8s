@@ -1,6 +1,0 @@
-{
-  "gcp-k8s-cluster": {
-    "k8s-control-plane-public-ip": "34.134.235.133",
-    "k8s-worker-1-public-ip": "34.69.102.211"
-  }
-}

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  annotations:
+    kubernetes.io/ingress.allow-http: "true"
+    cert-manager.io/issuer: "letsencrypt-production"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: sample.leo-tech.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sample-nginx-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - sample.leo-tech.dev 
+    secretName: sample-ssl

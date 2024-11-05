@@ -1,11 +1,11 @@
 # publicipアドレスが35.222.109.183でワーカーノードが動作している
-# そのマシンの35.222.109.183:30000にアクセスした時、nginxの画面が表示されることを確認できるようにする
+# そのマシンの35.222.109.183:30000にアクセスした時、nginxの画面が表示されることを確認できるようになる
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodeport-service
+  name: sample-nginx-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 80
     targetPort: 80
@@ -15,7 +15,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: sample-nginx-deployment
 spec:
   replicas: 1
   selector:
