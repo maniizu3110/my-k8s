@@ -8,4 +8,5 @@
 ### クラウド
 - Knativeのサポート
 - ArgoCDのサポート
-- CRDのサポート([KubernetesのCustomResourceDefinitionを理解する](https://qiita.com/shmurata/items/5f5334f67610b899a811))してKaaSとして利用
+- CRDによるKaaSの実現
+    - [作って学ぶkubebuilder](https://zoetrope.github.io/kubebuilder-training/)
